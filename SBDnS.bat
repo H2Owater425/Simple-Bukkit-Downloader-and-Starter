@@ -1,7 +1,7 @@
 @echo off
 @chcp 65001
 setlocal enabledelayedexpansion
-set ver=2020.5.0
+set ver=2020.5.1
 set Ph=%~dp0
 PUSHD !Ph!
 mode con cols=120 lines=30
@@ -64,7 +64,7 @@ echo │  1. Bukkit donwloader
 
 echo │  2. Server starter
 
-echo │  3. self-diagnosis tool
+echo │  3. Self-diagnosis tools
 
 echo │  Q. Quit
 
@@ -82,7 +82,7 @@ if "!main!"=="1" (
 ) else if "!main!"=="2" (
 	goto Server_starter
 ) else if "!main!"=="3" (
-	goto self-diagnosis_tool
+	goto Self-diagnosis_tools
 ) else if "!main!"=="q" (
 	exit
 ) else if "!main!"=="Q" (
@@ -167,6 +167,7 @@ if not "%ERRORLEVEL%" == "0" (
 echo.
 echo = Download finished^^!
 PAUSE
+cd !Ph!
 goto Main
 
 :Server_starter
@@ -249,7 +250,7 @@ if exist .\Bukkits\!bfolder!\spigot.jar (
 )
 echo !Ph!\Bukkits\!bfolder!\spigot.jar [!bsize!B]
 echo.
-echo = Buckkit file detected^^!
+echo = bukkit file detected^^!
 echo.
 echo ~ Starting server...
 echo.
@@ -262,13 +263,89 @@ echo = Server stopped^^!
 PAUSE
 goto Main
 
-:self-diagnosis_tool
-set now=self-diagnosis_tool
-title SBDnS_!ver! - diagnosis
+:Self-diagnosis_tools
+set now=Self-diagnosis_tools
+title SBDnS_!ver! - Self-diagnosis_tools
 cls
+echo ┌─────────────── [ Self-diagnosis_tools ]────────────
+
+echo │
+
+echo │  Following tools are prepared for you:
+
+echo │
+
+echo │  1. Java checker
+
+echo │  2. BuildTools.jar checker
+
+echo │  Q. Quit
+
+echo │
+
+echo └────────────────────────────────────────────────────
+echo.
+set /p diag=Run: 
+echo !diag!| findstr /r "^[1-2]$ ^[qQ]$">nul
+if not "%ERRORLEVEL%" == "0" (
+	goto EI
+)
+if "!diag!"=="1" (
+	goto Self-diagnosis_tools-java_checking
+) else if "!diag!"=="2" (
+	goto Self-diagnosis_tools-buildtool_checking
+) else if "!diag!"=="q" (
+	exit
+) else if "!diag!"=="Q" (
+	exit
+)
+
+:Self-diagnosis_tools-java_checking
+set now=Self-diagnosis_tools-java_checking
+title SBDnS_!ver! - Checking_Java
+cls
+echo.
+echo ~ Checking Java...
+echo.
+java -version
+if not "%ERRORLEVEL%" == "0" (
+	goto EJ	
+)
+echo.
+echo = Java detected^^!
 PAUSE
+goto Main
+
+:Self-diagnosis_tools-buildtool_checking
+set now=Self-diagnosis_tools-buildtool_checking
+title SBDnS_!ver! - Checking_BuildTools.jar
+cls
+echo.
+echo ~ Checking BuildTools.jar...
+if exist .\Lib\BuildTools.jar (
+	echo.
+	echo = BuildTools.jar detected^^!
+) else (
+	echo.
+	echo = There was no BuildTools.jar detected^^!
+	echo.
+	echo ~ Downloading spigot's buildtool...
+	powershell "(New-Object System.Net.WebClient).DownloadFile('https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar','.\Lib\BuildTools.jar')" >> nul
+	if not exist .\Lib\BuildTools.jar (
+		goto ED
+	)
+	for /f "usebackq" %%A in ('.\Lib\BuildTools.jar') do set btsize=%%~zA
+	call .\Lib\cmd\getdatetime.cmd
+	echo.	
+	echo !fulltime! [!btsize!B] - !Ph!\Lib\BuildTools.jar saved
+	echo.
+	echo = Downlaod finished^^!
+)
+PAUSE
+goto Main
 
 :EJ
+title SBDnS_!ver! - Error_code-01
 cls
 echo ┌───────────────── [ Error_code-01 ]─────────────────
 
@@ -287,6 +364,7 @@ PAUSE >> nul
 start https://java.com/
 
 :ED
+title SBDnS_!ver! - Error_code-02
 cls
 echo ┌───────────────── [ Error_code-02 ]─────────────────
 
@@ -305,6 +383,7 @@ PAUSE >> nul
 start mailto:h2o@h2owr.xyz
 
 :EBN
+title SBDnS_!ver! - Error_code-03
 cls
 echo ┌───────────────── [ Error_code-03 ]─────────────────
 
@@ -323,6 +402,7 @@ PAUSE >> nul
 goto !now!
 
 :EBD
+title SBDnS_!ver! - Error_code-04
 cls
 echo ┌───────────────── [ Error_code-04 ]─────────────────
 
@@ -341,6 +421,7 @@ PAUSE >> nul
 start mailto:h2o@h2owr.xyz
 
 :EBFI
+title SBDnS_!ver! - Error_code-05_01
 cls
 echo ┌───────────────── [ Error_code-05_01 ]─────────────────
 
@@ -359,6 +440,7 @@ PAUSE >> nul
 goto !now!
 
 :EBFIS
+title SBDnS_!ver! - Error_code-05_02
 cls
 echo ┌───────────────── [ Error_code-05_02 ]─────────────────
 
@@ -377,8 +459,9 @@ PAUSE >> nul
 goto !now!
 
 :EI
+title SBDnS_!ver! - Error_code-06
 cls
-echo ┌───────────────── [ Error_code-99 ]─────────────────
+echo ┌───────────────── [ Error_code-06 ]─────────────────
 
 echo │
 
