@@ -1,1 +1,1 @@
-# Simple-Bukkit-Downloader-and-Starter
+# Simple-Bukkit-Downloader-and-Starter (SBDnS)
