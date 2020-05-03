@@ -1,6 +1,5 @@
 # Simple-Bukkit-Downloader-and-Starter (SBDnS)
 > Easy(?) and simple(?) minecraft spigot bukkit manager: SBDnS!
-
 > by H2Owater425
 
 ## What is this?
