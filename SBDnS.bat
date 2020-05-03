@@ -1,7 +1,7 @@
 @echo off
 @chcp 65001
 setlocal enabledelayedexpansion
-set ver=2020.5.1
+set ver=2020.5.1f1
 set Ph=%~dp0
 PUSHD !Ph!
 mode con cols=120 lines=30
