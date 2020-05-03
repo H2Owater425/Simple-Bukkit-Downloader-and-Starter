@@ -1,6 +1,6 @@
 # Simple-Bukkit-Downloader-and-Starter (SBDnS)
 > Easy(?) and simple(?) minecraft spigot bukkit manager: SBDnS!
-> by H2Owater425
+> By H2Owater425
 
 ## What is this?
 This is batch file that allows you to download minecraft spigot buckkit more easier, and faster. *(I think...)*
