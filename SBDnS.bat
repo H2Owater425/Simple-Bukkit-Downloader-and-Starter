@@ -1,7 +1,7 @@
 @echo off
 @chcp 65001
 setlocal enabledelayedexpansion
-set ver=2020.5.1f1
+set ver=2020.5.2f2
 set Ph=%~dp0
 PUSHD "!Ph!"
 mode con cols=120 lines=30
@@ -17,10 +17,10 @@ if not exist ".\Data\.RD" (
 	echo.
 	echo ~ Checking Java...
 	echo.
+	java -version
 	if not exist "%userprofile%\appdata\locallow\Sun\Java\Deployment\deployment.properties" (
 		goto EJ
 	)
-	java -version
 	if not "%ERRORLEVEL%" == "0" (
 		goto EJ	
 	)
@@ -70,7 +70,7 @@ echo │  1. Bukkit donwloader
 
 echo │  2. Server starter
 
-echo │  3. Troubleshooting tools
+echo │  3. Troubleshooting tool
 
 echo │  Q. Quit
 
@@ -78,7 +78,7 @@ echo │
 
 echo └────────────────────────────────────────────────────
 echo.
-set /p main=Run: 
+set /p main=SBDnS^> 
 echo !main!| findstr /r "^[1-3]$ ^[qQ]$">nul
 if not "%ERRORLEVEL%" == "0" (
 	goto EI
@@ -88,7 +88,7 @@ if "!main!"=="1" (
 ) else if "!main!"=="2" (
 	goto Server_starter
 ) else if "!main!"=="3" (
-	goto Self-diagnosis_tools
+	goto Troubleshooting_tool
 ) else if "!main!"=="q" (
 	exit
 ) else if "!main!"=="Q" (
@@ -112,7 +112,7 @@ echo │  Supported versions are 1.8 ~ latest.
 echo │
 
 echo └────────────────────────────────────────────────────
-set /p bver=Run: 
+set /p bver=SBDnS^> 
 echo !bver!| findstr /r "^1\.[8-9]\.[1-9]$ ^1\.[8-9]$ ^1\.[8-9]\.10$ ^1\.[1-9][0-9]\.[1-9]$ ^1\.[1-9][0-9]$ ^1\.[1-9][0-9]\.10$ ^[mM]$">nul
 if not "%ERRORLEVEL%" == "0" (
 	goto EI
@@ -150,7 +150,7 @@ call ".\Lib\cmd\printlist.cmd"
 echo │
 
 echo └────────────────────────────────────────────────────
-set /p bname=Run: 
+set /p bname=SBDnS^> 
 if exist .\Bukkits\!bname!_!bver! (
 	goto EBN
 )
@@ -201,7 +201,7 @@ call ".\Lib\cmd\printlist.cmd"
 echo │
 
 echo └────────────────────────────────────────────────────
-set /p bs=Run: 
+set /p bs=SBDnS^> 
 for /f "tokens=1,2 delims=: " %%a in (.\Data\list) do (
 	if "%%a"=="!bs!" (
 		set bfolder=%%b
@@ -211,6 +211,10 @@ echo !bs!| findstr /r "^[1-9][0-9]*$ ^[mM]$">nul
 if not "%ERRORLEVEL%" == "0" (
 	goto EI
 )
+set filenum=0
+for /f  %%i in ('DIR ".\Bukkits\" /b') do (
+	set /a filenum+=1
+)
 if not exist ".\Bukkits\!bfolder!\" (
 	goto ENB
 )
@@ -218,6 +222,10 @@ if "!bs!"=="m" (
 	goto Main
 ) else if "!bs!"=="M" (
 	goto Main
+) else if !bs! gtr !filenum! (
+	goto EI
+) else if !bs! leq 0 (
+	goto EI
 )
 goto Server_starter-ram
 
@@ -238,7 +246,7 @@ echo │  The unit is Gigabyte(GB).
 echo │
 
 echo └────────────────────────────────────────────────────
-set /p ram=Run: 
+set /p ram=SBDnS^> 
 echo !ram!| findstr /r "^[1-9][0-9]*$ ^[mM]$">nul
 if not "%ERRORLEVEL%" == "0" (
 	goto EI
@@ -285,48 +293,21 @@ cd ".\Bukkits\!bfolder!\"
 call ".\Lib\cmd\getdatetime.cmd"
 set serverstart=!fulltime!
 java -Xms!ram!G -Xmx!ram!G -jar spigot.jar
+if not "%ERRORLEVEL%" == "0" (
+	goto ESS
+)
 echo.
 cd "!Ph!"
 call ".\Lib\cmd\getdatetime.cmd"
 set serverstop=!fulltime!
 echo = Server stopped^^!
-echo.
 echo = Server lasted !serverstart! ~ !serverstop!
 PAUSE >> nul
 goto Main
 
-:Troubleshooting_tools
-set now=Self-diagnosis_tools
-title SBDnS_!ver! - Self-diagnosis_tools
-cls
-echo ┌────────────── [ Troubleshooting_tools ]────────────
-
-echo │
-
-echo │  1. Check Java & BuildTools.jar
-
-echo │  M. Main
-
-echo │
-
-echo └────────────────────────────────────────────────────
-echo.
-set /p diag=Run: 
-echo !diag!| findstr /r "^[1-2]$ ^[mM]$">nul
-if not "%ERRORLEVEL%" == "0" (
-	goto EI
-)
-if "!diag!"=="1" (
-	goto Troubleshooting_tools-checking
-) else if "!diag!"=="m" (
-	goto Main
-) else if "!diag!"=="M" (
-	goto Main
-)
-
-:Troubleshooting_tools-checking
-set now=Self-diagnosis_tools-java_checking
-title SBDnS_!ver! - Checking_Java
+:Troubleshooting_tool
+set now=Troubleshooting_tool
+title SBDnS_!ver! - Troubleshooting
 cls
 echo.
 echo ~ Checking Java...
@@ -343,8 +324,24 @@ echo = Java detected^^!
 echo.
 echo ~ Checking BuildTools.jar...
 if exist ".\Lib\BuildTools.jar" (
-	echo.
-	echo = BuildTools.jar detected^^!
+	for /f "usebackq" %%A in ('".\Lib\BuildTools.jar"') do set btsize=%%~zA
+	if !btsize! lss 3879731 (
+		echo.
+		echo = Wrongly downloaded BuildTools.jar detected^^!
+		del ".\Lib\BuildTools.jar"
+		powershell "(New-Object System.Net.WebClient).DownloadFile('https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar','.\Lib\BuildTools.jar')" >> nul
+		echo.
+		echo ~ Re-downloading spigot's buildtool...
+		echo.	
+		for /f "usebackq" %%A in ('".\Lib\BuildTools.jar"') do set btsize=%%~zA
+		call ".\Lib\cmd\getdatetime.cmd"
+		echo !fulltime! [!btsize!B] - !Ph!\Lib\BuildTools.jar saved
+		echo.
+		echo = Downlaod finished^^!
+	) else (
+		echo.
+		echo = BuildTools.jar detected^^!
+	)
 ) else (
 	echo.
 	echo = There was no BuildTools.jar detected^^!
@@ -361,7 +358,9 @@ if exist ".\Lib\BuildTools.jar" (
 	echo.
 	echo = Downlaod finished^^!
 )
-PAUSE >> nul
+	echo.
+echo ~ All check finished, entering main...
+timeout /t 5 >> nul
 goto Main
 
 :EJ
@@ -434,14 +433,14 @@ echo │  There was an unexpected error on downloading spigot.jar^^!
 
 echo │
 
-echo │  Please contact to developer...
+echo │  Please use Troubleshooting tool or contact to developer...
 
 echo │
 
 echo └────────────────────────────────────────────────────
 PAUSE >> nul
 start mailto:h2o@h2owr.xyz
-exit
+goto main
 
 :ENB
 title SBDnS_!ver! - Error_code-05
@@ -473,7 +472,7 @@ echo │  There are no bukkit file detected in the folder: !bfolder!^^!
 
 echo │
 
-echo │  Please download or redownload the bukkit...
+echo │  Please download or re-download the bukkit...
 
 echo │
 
@@ -492,7 +491,26 @@ echo │  There are wrongly downloaded bukkit file in the folder: !bfolder!^^!
 
 echo │
 
-echo │  Please download or redownload the bukkit...
+echo │  Please download or re-download the bukkit...
+
+echo │
+
+echo └────────────────────────────────────────────────────
+PAUSE >> nul
+goto !now!
+
+:ESS
+title SBDnS_!ver! - Error_code-07
+cls
+echo ┌───────────────── [ Error_code-07 ]─────────────────
+
+echo │
+
+echo │  There was error while starting server: !bfolder! with !ram!GB of ram^^!
+
+echo │
+
+echo │  Please re-select ram limitation or check bukkit folder...
 
 echo │
 

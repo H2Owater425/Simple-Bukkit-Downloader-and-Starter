@@ -17,7 +17,7 @@ for /f "delims=" %%i in (.\Data\listtemp) do (
 	)
 )
 if !no! == 0 (
-	echo There are no bukkit file! > ".\Data\list"
+	echo ^(No bukkit in directory^) > ".\Data\list"
 )
 if exist ".\Data\listtemp" (
 	del ".\Data\listtemp"
