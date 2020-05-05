@@ -1,1 +1,0 @@
-for /f "usebackq" %%A in ('.\Bukkits\!bfolder!\spigot.jar') do set bsize=%%~zA

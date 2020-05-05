@@ -3,17 +3,23 @@
 setlocal enabledelayedexpansion
 set ver=2020.5.1f1
 set Ph=%~dp0
-PUSHD !Ph!
+PUSHD "!Ph!"
 mode con cols=120 lines=30
 title SBDnS_!ver!
 
 :Preparing
 set now=Preparing
-if not exist .\Data\.RD (
-	title SBDnS_!ver! - Preparing
+title SBDnS_!ver! - Preparing
+cls
+if not exist ".\Data\.RD" (
+	echo.
+	echo ~ Preparing SBDnS...
 	echo.
 	echo ~ Checking Java...
 	echo.
+	if not exist "%userprofile%\appdata\locallow\Sun\Java\Deployment\deployment.properties" (
+		goto EJ
+	)
 	java -version
 	if not "%ERRORLEVEL%" == "0" (
 		goto EJ	
@@ -22,23 +28,23 @@ if not exist .\Data\.RD (
 	echo = Java detected^^!
 	echo.
 	echo ~ Downloading spigot's buildtool...
-	if exist .\Lib\BuildTools.jar (
-		del .\Lib\BuildTools.jar
+	if exist ".\Lib\BuildTools.jar" (
+		del ".\Lib\BuildTools.jar"
 		powershell "(New-Object System.Net.WebClient).DownloadFile('https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar','.\Lib\BuildTools.jar')" >> nul
 	) else (
 		powershell "(New-Object System.Net.WebClient).DownloadFile('https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar','.\Lib\BuildTools.jar')" >> nul
 	)
-	if not exist .\Lib\BuildTools.jar (
+	if not exist ".\Lib\BuildTools.jar" (
 		goto ED
 	)
-	for /f "usebackq" %%A in ('.\Lib\BuildTools.jar') do set btsize=%%~zA
-	call .\Lib\cmd\getdatetime.cmd
+	for /f "usebackq" %%A in ('".\Lib\BuildTools.jar"') do set btsize=%%~zA
+	call ".\Lib\cmd\getdatetime.cmd"
 	echo.	
 	echo !fulltime! [!btsize!B] - !Ph!\Lib\BuildTools.jar saved
 	echo.
 	echo = Downlaod finished^^!
 	echo.
-	echo Ready on !fulltime!>>nul>.\Data\.RD
+	echo Ready on !fulltime!>>nul>".\Data\.RD"
 	echo ~ All task finished, entering main...
 	timeout /t 5 >> nul
 )
@@ -64,7 +70,7 @@ echo │  1. Bukkit donwloader
 
 echo │  2. Server starter
 
-echo │  3. Self-diagnosis tools
+echo │  3. Troubleshooting tools
 
 echo │  Q. Quit
 
@@ -107,15 +113,20 @@ echo │
 
 echo └────────────────────────────────────────────────────
 set /p bver=Run: 
-echo !bver!| findstr /r "^1\.[8-9]\.[1-9]$ ^1\.[8-9]$ ^1\.[8-9]\.10$ ^1\.[1-9][0-9]\.[1-9]$ ^1\.[1-9][0-9]$ ^1\.[1-9][0-9]\.10$">nul
+echo !bver!| findstr /r "^1\.[8-9]\.[1-9]$ ^1\.[8-9]$ ^1\.[8-9]\.10$ ^1\.[1-9][0-9]\.[1-9]$ ^1\.[1-9][0-9]$ ^1\.[1-9][0-9]\.10$ ^[mM]$">nul
 if not "%ERRORLEVEL%" == "0" (
 	goto EI
+)
+if "!bver!"=="m" (
+	goto Main
+) else if "!bver!"=="M" (
+	goto Main
 )
 goto Bukkit_downloader-folder
 
 :Bukkit_downloader-folder
 set now=Bukkit_downloader-folder
-call .\Lib\cmd\getlist.cmd
+call ".\Lib\cmd\getlist.cmd"
 title SBDnS_!ver! - Choosing_folder_name [ !bver! ]
 cls
 echo ┌──────────────── [ Bukkit_downloader ]──────────────
@@ -134,8 +145,8 @@ echo │  Following folders are already exist:
 
 echo │
 
-for /f "delims=" %%i in (.\Data\list) do echo │  %%i
-for /f "tokens=1 delims=:" %%a in (.\Data\list) do set no=%%a
+call ".\Lib\cmd\printlist.cmd"
+
 echo │
 
 echo └────────────────────────────────────────────────────
@@ -160,19 +171,21 @@ echo = Java detected^^!
 echo.
 echo ~ Downloading bukkit...
 echo.
-call .\Lib\cmd\downbukkit.cmd
+if not exist ".\Bukkits" (
+	md ".\Bukkits"
+)
+call ".\Lib\cmd\downbukkit.cmd"
 if not "%ERRORLEVEL%" == "0" (
 	goto EBD
 )
 echo.
 echo = Download finished^^!
-PAUSE
-cd !Ph!
+PAUSE >> nul
 goto Main
 
 :Server_starter
 set now=Server_starter
-call .\Lib\cmd\getlist.cmd
+call ".\Lib\cmd\getlist.cmd"
 title SBDnS_!ver! - Selecting_bukkit
 cls
 echo ┌────────────────── [ Server_starter ]───────────────
@@ -183,20 +196,28 @@ echo │  Please select one of the bukkit's NUMBER from the list:
 
 echo │
 
-for /f "delims=" %%i in (.\Data\list) do echo │  %%i
-for /f "tokens=1 delims=:" %%a in (.\Data\list) do set no=%%a
+call ".\Lib\cmd\printlist.cmd"
+
 echo │
 
 echo └────────────────────────────────────────────────────
 set /p bs=Run: 
-for /f "tokens=1,2 delims=. " %%a in (.\Data\list) do (
+for /f "tokens=1,2 delims=: " %%a in (.\Data\list) do (
 	if "%%a"=="!bs!" (
 		set bfolder=%%b
 	)
 )
-echo !bs!| findstr /r "^[1-9][0-9]*$">nul
+echo !bs!| findstr /r "^[1-9][0-9]*$ ^[mM]$">nul
 if not "%ERRORLEVEL%" == "0" (
 	goto EI
+)
+if not exist ".\Bukkits\!bfolder!\" (
+	goto ENB
+)
+if "!bs!"=="m" (
+	goto Main
+) else if "!bs!"=="M" (
+	goto Main
 )
 goto Server_starter-ram
 
@@ -218,9 +239,14 @@ echo │
 
 echo └────────────────────────────────────────────────────
 set /p ram=Run: 
-echo !ram!| findstr /r "^[1-9][0-9]*$">nul
+echo !ram!| findstr /r "^[1-9][0-9]*$ ^[mM]$">nul
 if not "%ERRORLEVEL%" == "0" (
 	goto EI
+)
+if "!ram!"=="m" (
+	goto Main
+) else if "!ram!"=="M" (
+	goto Main
 )
 goto Server_starter-starting
 
@@ -240,89 +266,83 @@ echo = Java detected^^!
 echo.
 echo ~ Checking bukkit file...
 echo.
-if exist .\Bukkits\!bfolder!\spigot.jar (
-	call .\Lib\cmd\getfilesize.cmd
+if exist ".\Bukkits\!bfolder!\spigot.jar" (
+	for /f "usebackq" %%A in ('".\Bukkits\!bfolder!\spigot.jar"') do set bsize=%%~zA
 	if !bsize! lss 19818087 (
 		goto EBFIS
 	)
 ) else (
 	goto EBFI
 )
-echo !Ph!\Bukkits\!bfolder!\spigot.jar [!bsize!B]
+call ".\Lib\cmd\getdatetime.cmd"
+echo !fulltime! [!btsize!B] - !Ph!\Lib\BuildTools.jar detected
 echo.
 echo = bukkit file detected^^!
 echo.
 echo ~ Starting server...
 echo.
-cd .\Bukkits\!bfolder!\
+cd ".\Bukkits\!bfolder!\"
+call ".\Lib\cmd\getdatetime.cmd"
+set serverstart=!fulltime!
 java -Xms!ram!G -Xmx!ram!G -jar spigot.jar
 echo.
-PAUSE >> nul
-cd !Ph!
+cd "!Ph!"
+call ".\Lib\cmd\getdatetime.cmd"
+set serverstop=!fulltime!
 echo = Server stopped^^!
-PAUSE
+echo.
+echo = Server lasted !serverstart! ~ !serverstop!
+PAUSE >> nul
 goto Main
 
-:Self-diagnosis_tools
+:Troubleshooting_tools
 set now=Self-diagnosis_tools
 title SBDnS_!ver! - Self-diagnosis_tools
 cls
-echo ┌─────────────── [ Self-diagnosis_tools ]────────────
+echo ┌────────────── [ Troubleshooting_tools ]────────────
 
 echo │
 
-echo │  Following tools are prepared for you:
+echo │  1. Check Java & BuildTools.jar
 
-echo │
-
-echo │  1. Java checker
-
-echo │  2. BuildTools.jar checker
-
-echo │  Q. Quit
+echo │  M. Main
 
 echo │
 
 echo └────────────────────────────────────────────────────
 echo.
 set /p diag=Run: 
-echo !diag!| findstr /r "^[1-2]$ ^[qQ]$">nul
+echo !diag!| findstr /r "^[1-2]$ ^[mM]$">nul
 if not "%ERRORLEVEL%" == "0" (
 	goto EI
 )
 if "!diag!"=="1" (
-	goto Self-diagnosis_tools-java_checking
-) else if "!diag!"=="2" (
-	goto Self-diagnosis_tools-buildtool_checking
-) else if "!diag!"=="q" (
-	exit
-) else if "!diag!"=="Q" (
-	exit
+	goto Troubleshooting_tools-checking
+) else if "!diag!"=="m" (
+	goto Main
+) else if "!diag!"=="M" (
+	goto Main
 )
 
-:Self-diagnosis_tools-java_checking
+:Troubleshooting_tools-checking
 set now=Self-diagnosis_tools-java_checking
 title SBDnS_!ver! - Checking_Java
 cls
 echo.
 echo ~ Checking Java...
 echo.
+if not exist "%userprofile%\appdata\locallow\Sun\Java\Deployment\deployment.properties" (
+	goto EJ
+)
 java -version
 if not "%ERRORLEVEL%" == "0" (
 	goto EJ	
 )
 echo.
 echo = Java detected^^!
-PAUSE
-goto Main
-
-:Self-diagnosis_tools-buildtool_checking
-set now=Self-diagnosis_tools-buildtool_checking
-title SBDnS_!ver! - Checking_BuildTools.jar
-cls
 echo.
 echo ~ Checking BuildTools.jar...
-if exist .\Lib\BuildTools.jar (
+if exist ".\Lib\BuildTools.jar" (
 	echo.
 	echo = BuildTools.jar detected^^!
 ) else (
@@ -331,17 +351,17 @@ if exist .\Lib\BuildTools.jar (
 	echo.
 	echo ~ Downloading spigot's buildtool...
 	powershell "(New-Object System.Net.WebClient).DownloadFile('https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar','.\Lib\BuildTools.jar')" >> nul
-	if not exist .\Lib\BuildTools.jar (
+	if not exist ".\Lib\BuildTools.jar" (
 		goto ED
 	)
-	for /f "usebackq" %%A in ('.\Lib\BuildTools.jar') do set btsize=%%~zA
-	call .\Lib\cmd\getdatetime.cmd
+	for /f "usebackq" %%A in ('".\Lib\BuildTools.jar"') do set btsize=%%~zA
+	call ".\Lib\cmd\getdatetime.cmd"
 	echo.	
 	echo !fulltime! [!btsize!B] - !Ph!\Lib\BuildTools.jar saved
 	echo.
 	echo = Downlaod finished^^!
 )
-PAUSE
+PAUSE >> nul
 goto Main
 
 :EJ
@@ -362,6 +382,7 @@ echo │
 echo └────────────────────────────────────────────────────
 PAUSE >> nul
 start https://java.com/
+exit
 
 :ED
 title SBDnS_!ver! - Error_code-02
@@ -381,6 +402,7 @@ echo │
 echo └────────────────────────────────────────────────────
 PAUSE >> nul
 start mailto:h2o@h2owr.xyz
+exit
 
 :EBN
 title SBDnS_!ver! - Error_code-03
@@ -408,7 +430,7 @@ echo ┌───────────────── [ Error_code-04 ]─
 
 echo │
 
-echo │  There was an unexpected error on downloading the bukkit file^^!
+echo │  There was an unexpected error on downloading spigot.jar^^!
 
 echo │
 
@@ -419,11 +441,31 @@ echo │
 echo └────────────────────────────────────────────────────
 PAUSE >> nul
 start mailto:h2o@h2owr.xyz
+exit
+
+:ENB
+title SBDnS_!ver! - Error_code-05
+cls
+echo ┌───────────────── [ Error_code-05 ]─────────────────
+
+echo │
+
+echo │  There are no bukkit folder^^!
+
+echo │
+
+echo │  Please download the bukkit...
+
+echo │
+
+echo └────────────────────────────────────────────────────
+PAUSE >> nul
+goto !now!
 
 :EBFI
-title SBDnS_!ver! - Error_code-05_01
+title SBDnS_!ver! - Error_code-06_01
 cls
-echo ┌───────────────── [ Error_code-05_01 ]─────────────────
+echo ┌───────────────── [ Error_code-06_01 ]─────────────────
 
 echo │
 
@@ -440,9 +482,9 @@ PAUSE >> nul
 goto !now!
 
 :EBFIS
-title SBDnS_!ver! - Error_code-05_02
+title SBDnS_!ver! - Error_code-06_02
 cls
-echo ┌───────────────── [ Error_code-05_02 ]─────────────────
+echo ┌───────────────── [ Error_code-06_02 ]─────────────────
 
 echo │
 
@@ -459,9 +501,9 @@ PAUSE >> nul
 goto !now!
 
 :EI
-title SBDnS_!ver! - Error_code-06
+title SBDnS_!ver! - Error_code-07
 cls
-echo ┌───────────────── [ Error_code-06 ]─────────────────
+echo ┌───────────────── [ Error_code-07 ]─────────────────
 
 echo │
 
