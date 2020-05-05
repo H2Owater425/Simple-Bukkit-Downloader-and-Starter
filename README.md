@@ -8,7 +8,7 @@ This is batch file that allows you to download minecraft spigot buckkit more eas
 **It can do things like:**
 - Download bukkit
 - Start bukkit
-- Self-diagnosis with tools
+- Troubleshooting tool
 
 Thats it.
 
