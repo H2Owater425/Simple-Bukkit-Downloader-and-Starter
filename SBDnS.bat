@@ -1,7 +1,7 @@
 @echo off
 @chcp 65001
 setlocal enabledelayedexpansion
-set ver=2020.5.2f2
+set ver=2020.5.2f4
 set Ph=%~dp0
 PUSHD "!Ph!"
 mode con cols=120 lines=30
@@ -30,15 +30,15 @@ if not exist ".\Data\.RD" (
 	echo ~ Downloading spigot's buildtool...
 	if exist ".\Lib\BuildTools.jar" (
 		del ".\Lib\BuildTools.jar"
-		powershell "(New-Object System.Net.WebClient).DownloadFile('https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar','.\Lib\BuildTools.jar')" >> nul
+		Powershell -executionpolicy remotesigned -file "./Lib/downbuildtools.ps1" > nul
 	) else (
-		powershell "(New-Object System.Net.WebClient).DownloadFile('https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar','.\Lib\BuildTools.jar')" >> nul
+		Powershell -executionpolicy remotesigned -file "./Lib/downbuildtools.ps1" > nul
 	)
 	if not exist ".\Lib\BuildTools.jar" (
 		goto ED
 	)
 	for /f "usebackq" %%A in ('".\Lib\BuildTools.jar"') do set btsize=%%~zA
-	call ".\Lib\cmd\getdatetime.cmd"
+	call ".\Lib\getdatetime.cmd"
 	echo.	
 	echo !fulltime! [!btsize!B] - !Ph!\Lib\BuildTools.jar saved
 	echo.
@@ -126,7 +126,7 @@ goto Bukkit_downloader-folder
 
 :Bukkit_downloader-folder
 set now=Bukkit_downloader-folder
-call ".\Lib\cmd\getlist.cmd"
+call ".\Lib\getlist.cmd"
 title SBDnS_!ver! - Choosing_folder_name [ !bver! ]
 cls
 echo ┌──────────────── [ Bukkit_downloader ]──────────────
@@ -145,7 +145,7 @@ echo │  Following folders are already exist:
 
 echo │
 
-call ".\Lib\cmd\printlist.cmd"
+call ".\Lib\printlist.cmd"
 
 echo │
 
@@ -174,7 +174,7 @@ echo.
 if not exist ".\Bukkits" (
 	md ".\Bukkits"
 )
-call ".\Lib\cmd\downbukkit.cmd"
+call ".\Lib\downbukkit.cmd"
 if not "%ERRORLEVEL%" == "0" (
 	goto EBD
 )
@@ -185,7 +185,7 @@ goto Main
 
 :Server_starter
 set now=Server_starter
-call ".\Lib\cmd\getlist.cmd"
+call ".\Lib\getlist.cmd"
 title SBDnS_!ver! - Selecting_bukkit
 cls
 echo ┌────────────────── [ Server_starter ]───────────────
@@ -196,7 +196,7 @@ echo │  Please select one of the bukkit's NUMBER from the list:
 
 echo │
 
-call ".\Lib\cmd\printlist.cmd"
+call ".\Lib\printlist.cmd"
 
 echo │
 
@@ -282,7 +282,7 @@ if exist ".\Bukkits\!bfolder!\spigot.jar" (
 ) else (
 	goto EBFI
 )
-call ".\Lib\cmd\getdatetime.cmd"
+call ".\Lib\getdatetime.cmd"
 echo !fulltime! [!btsize!B] - !Ph!\Lib\BuildTools.jar detected
 echo.
 echo = bukkit file detected^^!
@@ -290,7 +290,7 @@ echo.
 echo ~ Starting server...
 echo.
 cd ".\Bukkits\!bfolder!\"
-call ".\Lib\cmd\getdatetime.cmd"
+call ".\Lib\getdatetime.cmd"
 set serverstart=!fulltime!
 java -Xms!ram!G -Xmx!ram!G -jar spigot.jar
 if not "%ERRORLEVEL%" == "0" (
@@ -298,7 +298,7 @@ if not "%ERRORLEVEL%" == "0" (
 )
 echo.
 cd "!Ph!"
-call ".\Lib\cmd\getdatetime.cmd"
+call ".\Lib\getdatetime.cmd"
 set serverstop=!fulltime!
 echo = Server stopped^^!
 echo = Server lasted !serverstart! ~ !serverstop!
@@ -329,12 +329,12 @@ if exist ".\Lib\BuildTools.jar" (
 		echo.
 		echo = Wrongly downloaded BuildTools.jar detected^^!
 		del ".\Lib\BuildTools.jar"
-		powershell "(New-Object System.Net.WebClient).DownloadFile('https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar','.\Lib\BuildTools.jar')" >> nul
+		Powershell -executionpolicy remotesigned -file "./Lib/downbuildtools.ps1" > nul
 		echo.
 		echo ~ Re-downloading spigot's buildtool...
 		echo.	
 		for /f "usebackq" %%A in ('".\Lib\BuildTools.jar"') do set btsize=%%~zA
-		call ".\Lib\cmd\getdatetime.cmd"
+		call ".\Lib\getdatetime.cmd"
 		echo !fulltime! [!btsize!B] - !Ph!\Lib\BuildTools.jar saved
 		echo.
 		echo = Downlaod finished^^!
@@ -347,12 +347,12 @@ if exist ".\Lib\BuildTools.jar" (
 	echo = There was no BuildTools.jar detected^^!
 	echo.
 	echo ~ Downloading spigot's buildtool...
-	powershell "(New-Object System.Net.WebClient).DownloadFile('https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar','.\Lib\BuildTools.jar')" >> nul
+	Powershell -executionpolicy remotesigned -file "./Lib/downbuildtools.ps1" > nul
 	if not exist ".\Lib\BuildTools.jar" (
 		goto ED
 	)
 	for /f "usebackq" %%A in ('".\Lib\BuildTools.jar"') do set btsize=%%~zA
-	call ".\Lib\cmd\getdatetime.cmd"
+	call ".\Lib\getdatetime.cmd"
 	echo.	
 	echo !fulltime! [!btsize!B] - !Ph!\Lib\BuildTools.jar saved
 	echo.
