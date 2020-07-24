@@ -1,7 +1,7 @@
 @echo off
 @chcp 65001
 setlocal enabledelayedexpansion
-set ver=2020.5.2f5
+set ver=2020.7.1f4
 set Ph=%~dp0
 PUSHD "!Ph!"
 mode con cols=120 lines=30
@@ -27,12 +27,12 @@ if not exist ".\Data\.RD" (
 	echo.
 	echo = Java detected^^!
 	echo.
-	echo ~ Downloading spigot's buildtool...
+	echo ~ Downloading spigot's buildtools...
 	if exist ".\Lib\BuildTools.jar" (
 		del ".\Lib\BuildTools.jar"
-		start /wait PowerShell -windowstyle hidden -executionpolicy remotesigned -file "./Lib/downbuildtools.ps1" > nul
+		start /wait PowerShell -windowstyle hidden -executionpolicy remotesigned -file ".\Lib\downbuildtools.ps1" > nul
 	) else (
-		start /wait PowerShell -windowstyle hidden -executionpolicy remotesigned -file "./Lib/downbuildtools.ps1" > nul
+		start /wait PowerShell -windowstyle hidden -executionpolicy remotesigned -file ".\Lib\downbuildtools.ps1" > nul
 	)
 	if not exist ".\Lib\BuildTools.jar" (
 		goto ED
@@ -42,7 +42,7 @@ if not exist ".\Data\.RD" (
 	echo.	
 	echo !fulltime! [!btsize!B] - !Ph!Lib\BuildTools.jar saved
 	echo.
-	echo = Downlaod finished^^!
+	echo = Download finished^^!
 	echo.
 	echo Ready on !fulltime!>>nul>".\Data\.RD"
 	echo ~ All task finished, entering main...
@@ -70,7 +70,9 @@ echo │  1. Bukkit donwloader
 
 echo │  2. Server starter
 
-echo │  3. Troubleshooting tool
+echo │  3. Junk file cleaner
+
+echo │  4. Troubleshooting tool
 
 echo │  Q. Quit
 
@@ -79,7 +81,7 @@ echo │
 echo └────────────────────────────────────────────────────
 echo.
 set /p main=SBDnS^> 
-echo !main!| findstr /r "^[1-3]$ ^[qQ]$">nul
+echo !main!| findstr /r "^[1-4]$ ^[qQ]$">nul
 if not "%ERRORLEVEL%" == "0" (
 	goto EI
 )
@@ -88,6 +90,8 @@ if "!main!"=="1" (
 ) else if "!main!"=="2" (
 	goto Server_starter
 ) else if "!main!"=="3" (
+	goto Junk_file_cleaner
+) else if "!main!"=="4" (
 	goto Troubleshooting_tool
 ) else if "!main!"=="q" (
 	exit
@@ -154,6 +158,7 @@ set /p bname=SBDnS^>
 if exist .\Bukkits\!bname!_!bver! (
 	goto EBN
 )
+goto Bukkit_downloader-downloading
 
 :Bukkit_downloader-downloading
 set now=Bukkit_downloader-downloading
@@ -179,7 +184,12 @@ if not "%ERRORLEVEL%" == "0" (
 	goto EBD
 )
 echo.
-echo = Download finished^^!
+if exist ".\Bukkits\!bname!_!bver!\spigot.jar" (
+	echo = Download finished^^!
+) else (
+	echo = Error occurred^^!
+	goto EBD
+)
 PAUSE >> nul
 goto Main
 
@@ -283,7 +293,7 @@ if exist ".\Bukkits\!bfolder!\spigot.jar" (
 	goto EBFI
 )
 call ".\Lib\getdatetime.cmd"
-echo !fulltime! [!btsize!B] - !Ph!Lib\BuildTools.jar detected
+echo !fulltime! [!btsize!B] - !Ph!Bukkits\!bfolder!\spigot.jar detected
 echo.
 echo = bukkit file detected^^!
 echo.
@@ -303,6 +313,81 @@ set serverstop=!fulltime!
 echo = Server stopped^^!
 echo = Server lasted !serverstart! ~ !serverstop!
 PAUSE >> nul
+goto Main
+
+:Junk_file_cleaner
+set now=Junk_file_cleaner
+title SBDnS_!ver! - Checking_junk_files
+cls
+echo.
+echo ~ Checking Junk files...
+if exist ".\Bukkits" (
+	call ".\Lib\getemptylist.cmd"
+	if exist ".\Data\emptylist" (
+		set emptyno=0
+		for /f "delims=" %%i in (.\Data\emptylist) do (
+			set bfilewo=%%i
+			set bfilewo=!bfilewo: =!
+			if not exist ".\Bukkits\!bfilewo!\spigot.jar" (
+				set /a emptyno+=1 >> nul
+			)
+		)
+		if "!emptyno!" == "1" (
+			echo.
+			echo = There is 1 junk file detected^^!
+			echo.
+			echo ~ Do you want to delete all the junk file?
+			echo.
+			set /p junk=[Y]es or [N]o ~ 
+			if "!junk!"=="y" (
+				call ".\Lib\delemptylist.cmd"
+				echo.
+				echo = 1 junk file deleted^^!
+			) else if "!junk!"=="Y" (
+				call ".\Lib\delemptylist.cmd"
+				echo.
+				echo = 1 junk file deleted^^!
+			) else if "!junk!"=="n" (
+				echo.
+				echo = Ignoring junk file...
+			) else if "!junk!"=="N" (
+				echo.
+				echo = Ignoring junk file...
+			)
+		) else (
+			echo.
+			echo = There are !emptyno! junk files detected^^!
+			echo.
+			echo ~ Do you want to delete all the junk files?
+			echo.
+			set /p junk=[Y]es or [N]o ~ 
+			if "!junk!"=="y" (
+				call ".\Lib\delemptylist.cmd"
+				echo.
+				echo = !emptyno! junk files deleted^^!
+			) else if "!junk!"=="Y" (
+				call ".\Lib\delemptylist.cmd"
+				echo.
+				echo = !emptyno! junk files deleted^^!
+			) else if "!junk!"=="n" (
+				echo.
+				echo = Ignoring junk files...
+			) else if "!junk!"=="N" (
+				echo.
+				echo = Ignoring junk files...
+			)
+		)
+	) else (
+		echo.
+		echo = There was no junk file detected^^!
+	)
+	echo.
+	echo ~ Junk file check finished, entering main...
+) else (
+	set now=Main
+	goto ENB
+)
+timeout /t 5 >> nul
 goto Main
 
 :Troubleshooting_tool
@@ -331,13 +416,13 @@ if exist ".\Lib\BuildTools.jar" (
 		del ".\Lib\BuildTools.jar"
 		start /wait PowerShell -windowstyle hidden -executionpolicy remotesigned -file "./Lib/downbuildtools.ps1" > nul
 		echo.
-		echo ~ Re-downloading spigot's buildtool...
+		echo ~ Re-downloading spigot's buildtools...
 		echo.	
 		for /f "usebackq" %%A in ('".\Lib\BuildTools.jar"') do set btsize=%%~zA
 		call ".\Lib\getdatetime.cmd"
 		echo !fulltime! [!btsize!B] - !Ph!Lib\BuildTools.jar saved
 		echo.
-		echo = Downlaod finished^^!
+		echo = Download finished^^!
 	) else (
 		echo.
 		echo = BuildTools.jar detected^^!
@@ -346,7 +431,7 @@ if exist ".\Lib\BuildTools.jar" (
 	echo.
 	echo = There was no BuildTools.jar detected^^!
 	echo.
-	echo ~ Downloading spigot's buildtool...
+	echo ~ Downloading spigot's buildtools...
 	start /wait PowerShell -windowstyle hidden -executionpolicy remotesigned -file "./Lib/downbuildtools.ps1" > nul
 	if not exist ".\Lib\BuildTools.jar" (
 		goto ED
@@ -356,9 +441,9 @@ if exist ".\Lib\BuildTools.jar" (
 	echo.	
 	echo !fulltime! [!btsize!B] - !Ph!Lib\BuildTools.jar saved
 	echo.
-	echo = Downlaod finished^^!
+	echo = Download finished^^!
 )
-	echo.
+echo.
 echo ~ All check finished, entering main...
 timeout /t 5 >> nul
 goto Main
