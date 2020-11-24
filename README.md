@@ -14,7 +14,7 @@ Thats it.
 What do you want from me more..? 😢
 
 ## How can I downlaod this?
-- Simply download the [latest release](https://github.com/H2Owater425/Simple-Bukkit-Downloader-and-Starter/releases "Releases · H2Owater425/Simple-Bukkit-Downloader-and-Starter") or [clone](https://github.com/H2Owater425/Simple-Bukkit-Downloader-and-Starter/archive/master.zip "Clone · H2Owater425/Simple-Bukkit-Downloader-and-Starter") this repository.
+- Simply download the [latest release](https://github.com/H2Owater425/Simple-Bukkit-Downloader-and-Starter/releases/latest "Releases Latest · H2Owater425/Simple-Bukkit-Downloader-and-Starter") or [clone](https://github.com/H2Owater425/Simple-Bukkit-Downloader-and-Starter/archive/master.zip "Clone · H2Owater425/Simple-Bukkit-Downloader-and-Starter") this repository.
 - *~~Via my [website](https://h2owr.xyz/work/sbdns.php "HW :: WORK_SBDnS.bat").~~* (very lousy and korean only 🤣)
 
 ## How can I use this?
